@@ -1,9 +1,9 @@
-﻿namespace Dotnet.Homeworks.Infrastructure.UnitOfWork;
+﻿using Dotnet.Homeworks.Data.DatabaseContext;
 
-public class UnitOfWork : IUnitOfWork
+namespace Dotnet.Homeworks.Infrastructure.UnitOfWork;
+
+public class UnitOfWork(AppDbContext dbContext) : IUnitOfWork
 {
-    public Task SaveChangesAsync(CancellationToken token)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task SaveChangesAsync(CancellationToken token)
+        => await dbContext.SaveChangesAsync(token);
 }

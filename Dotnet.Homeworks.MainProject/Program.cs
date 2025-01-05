@@ -1,6 +1,7 @@
 using Dotnet.Homeworks.Data.DatabaseContext;
 using Dotnet.Homeworks.MainProject.Configuration;
 using Dotnet.Homeworks.MainProject.Services;
+using Dotnet.Homeworks.MainProject.ServicesExtensions.Cqrs;
 using Dotnet.Homeworks.MainProject.ServicesExtensions.Masstransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services
+    .AddLogging()
     .Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMQ"))
-    .AddMasstransitRabbitMq();
+    .AddMasstransitRabbitMq()
+    .AddCqrs();
 
 builder.Services.AddControllers();
 
