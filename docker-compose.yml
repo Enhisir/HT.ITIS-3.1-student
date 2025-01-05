@@ -12,10 +12,19 @@ services:
       - "5433:5432"
     networks:
       - dotnet_network
-#  
-#  dotnet_rabbitmq:
-#    image: rabbitmq:3-alpine
-#    
+  
+  dotnet_rabbitmq:
+    image: rabbitmq:3-alpine
+    hostname: 'dotnet_rabbitmq'
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/data
+    ports:
+      - "15672:15672"
+    networks:
+      - dotnet_network
 #  dotnet_minio:
 #    image: minio/minio:latest
 #    
@@ -25,10 +34,27 @@ services:
 #  dotnet_jaeger:
 #    image: jaegertracing/all-in-one:latest
 #
-#    
-#  dotnet_mailing:
-#    image: dotnet-web
-#    
+  dotnet_mailing:
+    image: dotnet-web
+    build:
+      context: .
+      dockerfile: Dotnet.Homeworks.Mailing.API/Dockerfile
+    depends_on:
+      - dotnet_rabbitmq
+    environment:
+      EmailConfig__Email: admin@example.com
+      EmailConfig__Port: 443
+      EmailConfig__Host: example.com
+      EmailConfig__Password: password
+      RabbitMQ__Hostname: dotnet_rabbitmq
+      RabbitMQ__Username: admin
+      RabbitMQ__Password: password
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    networks:
+      - dotnet_network
+#
 #  dotnet_storage:
 #    image: dotnet-web
 #
@@ -39,16 +65,21 @@ services:
       dockerfile: Dotnet.Homeworks.MainProject/Dockerfile
     depends_on:
       - dotnet_postgres
+      - dotnet_rabbitmq
     environment:
       ASPNETCORE_URLS: "http://*:80"
       ConnectionStrings__Default: Host=dotnet_postgres;Port=5432;Database=homework;Username=admin;Password=password
+      RabbitMQ__Hostname: dotnet_rabbitmq
+      RabbitMQ__Username: admin
+      RabbitMQ__Password: password
     ports:
       - "9000:80"
     networks:
       - dotnet_network
 
 volumes:
-  postgres_data:
+  postgres_data: {}
+  rabbitmq_data: {}
 
 networks:
-  dotnet_network:
+  dotnet_network: {}
