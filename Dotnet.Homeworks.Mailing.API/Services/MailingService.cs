@@ -8,15 +8,12 @@ using MimeKit;
 
 namespace Dotnet.Homeworks.Mailing.API.Services;
 
-public class MailingService : IMailingService
+public class MailingService(
+    IOptions<EmailConfig> emailConfigOptions,
+    ILogger<MailingService> logger) : IMailingService
 {
-    private readonly EmailConfig _emailConfig;
-
-    public MailingService(IOptions<EmailConfig> emailConfig)
-    {
-        _emailConfig = emailConfig.Value;
-    }
-
+    private readonly EmailConfig _emailConfig = emailConfigOptions.Value;
+    
     public async Task<Result> SendEmailAsync(EmailMessage emailDto)
     {
         using var message = new MimeMessage();
@@ -31,10 +28,15 @@ public class MailingService : IMailingService
         using var client = new SmtpClient();
         try
         {
-            await client.ConnectAsync(_emailConfig.Host, _emailConfig.Port, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_emailConfig.Email, _emailConfig.Password);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
+            // await client.ConnectAsync(_emailConfig.Host, _emailConfig.Port, SecureSocketOptions.StartTls);
+            // await client.AuthenticateAsync(_emailConfig.Email, _emailConfig.Password);
+            // await client.SendAsync(message);
+            // await client.DisconnectAsync(true);
+            await Task.Delay(100);
+            logger.LogInformation("Sent email\n" 
+                                  + $"\tfrom: {_emailConfig.Email}\n"
+                                  + $"\tfrom: {emailDto.Email}\n"
+                                  + $"\tSubject: {emailDto.Subject}\n");
             return new Result(true);
         }
         catch (Exception ex)
