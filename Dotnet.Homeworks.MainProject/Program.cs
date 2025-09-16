@@ -11,9 +11,9 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.Services
     .AddLogging()
-    .Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMQ"))
-    .AddMasstransitRabbitMq()
     .AddCqrs();
+    .Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMQ"))
+    .AddMasstransitRabbitMq();
 
 builder.Services.AddControllers();
 
